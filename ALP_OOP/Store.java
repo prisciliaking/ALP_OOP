@@ -1,7 +1,7 @@
 package ALP_OOP;
 
 public class Store {
-
+    //nyimpen kalau store open or close dicek pake boolean
     private boolean isOpen;
 
     public Store() {
