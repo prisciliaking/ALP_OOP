@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package ALP_OOP1;
 
 import java.util.Scanner;
 
-/**
- *
- * @author ASUS
- */
 public class Menu {
 
     Scanner scan = new Scanner(System.in);
@@ -28,9 +20,10 @@ public class Menu {
             } else {
                 System.out.println("1. Buka Toko ");
             }
-            System.out.println("2. Detail Stok");
-            System.out.println("3. Daftar Transaksi");
-            System.out.println("4. Total Pendapatan Harian");
+            System.out.println("2. Masukkan Transaksi");
+            System.out.println("3. Detail Stok");
+            System.out.println("4. Daftar Transaksi");
+            System.out.println("5. Total Pendapatan Harian");
             System.out.println("0. Exit");
             System.out.println("==========================");
             System.out.print("Choose : ");
@@ -46,6 +39,10 @@ public class Menu {
                     break;
 
                 case 2:
+                    masukkanTransaksi();
+                    break;
+
+                case 3:
                     if (!store.isOpen()) {
                         System.out.println("Buka toko dulu !");
                     } else {
@@ -53,11 +50,11 @@ public class Menu {
                     }
                     break;
 
-                case 3:
+                case 4:
                     daftarTransaksi();
                     break;
-
-                case 4:
+                    
+                case 5:
                     totalPendapatan();
                     break;
                 case 0:
@@ -70,7 +67,15 @@ public class Menu {
             }
         } while (true);
     }
-
+    public void masukkanTransaksi(){
+        daftarBarang();
+        System.out.print("\nPilih barang (ID): ");
+        int barangId = scan.nextInt();
+        
+        System.out.println("\nJumlah barang: ");
+        int jumlahBarang = scan.nextInt();
+        // error handling kalau inputan melebihi stok
+    }
     // daftar stok barang
     public void detailStok() {
         System.out.println("");
@@ -118,22 +123,44 @@ public class Menu {
     }
 
     public void daftarBarang() {
-        System.out.println("==========================");
-        System.out.println("\n===== Daftar  Barang =====");
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar  Barang =====");
         penyimpanan.listBarang();
         System.out.println("==========================");
     }
 
     public void editStok() {
-
+        penyimpanan.listBarang();
+        //nanti stok baklan ke sout : terus di milih mau edit stok yang mana
+        // misalkan 
+        // 1. baju tidur | stok: 7 | harga : 70.000
+        // milih lah dia no 1 trus stok di kasir asliny 7 tpi ternyata digudang
+        // cuma 5, nah nanti jadiny gni
+        // ========
+        // ID : (inputan user sesuai id barang yang mau di ubah)
+        // Nama barang: 
+        // Stok baru : (inputan user stok digudang ada berapa banyak)
+        
+        // kalau udah ke ubah di hashmapny, ksh statement "stok telah terubah" biar
+        // tau kalau stokny udah ke ubah
     }
 
     public void editHarga() {
-
+        penyimpanan.listBarang();
+        // ini sama kek editStok, cuma ini harga aja
     }
 
     public void tambahStok() {
-
+        penyimpanan.listBarang();
+        // kalau ini nanti sama aja awalanny tpi outputny nnti gini
+        // =====
+        // Nama barang: (nama barangnya apa)
+        // Stok terkini: (jumlah stok barangnya)
+        // Stok tambahan:
+        
+        // Stok update: (jumlah antara terkini sama tambahan, yang kesimpen di hashmap)
+        
+        // ksih statement "stok telah ditambahkan"
     }
 
     public void tambahBarang() {
