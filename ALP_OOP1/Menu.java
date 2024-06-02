@@ -58,6 +58,7 @@ public class Menu {
                     totalPendapatan();
                     break;
                 case 0:
+                    penyimpanan.simpanKeFile("listBarang.txt");
                     System.out.println("Thank you !");
                     System.exit(0);
                     break;
@@ -125,7 +126,7 @@ public class Menu {
     public void daftarBarang() {
         System.out.println("\n==========================");
         System.out.println("===== Daftar  Barang =====");
-        penyimpanan.listBarang();
+        penyimpanan.bacaFile("listBarang.txt");
         System.out.println("==========================");
     }
 
@@ -164,6 +165,9 @@ public class Menu {
     }
 
     public void tambahBarang() {
+        // Load existing items from the file to ensure new item is appended correctly
+        penyimpanan.bacaFile("listBarang.txt");
+
         System.out.println("\n==========================");
         System.out.println("===== Tambah  Barang =====");
         System.out.print("==  Nama barang: ");
@@ -171,11 +175,15 @@ public class Menu {
         System.out.print("\n==  Stok barang: ");
         int stokbarang = scan.nextInt();
         System.out.print("\n==  Harga barang: ");
-        double hargabarang = scan.nextInt();
+        double hargabarang = scan.nextDouble();
         System.out.println("==========================");
+
         Barang barang = new Barang(namabarang, stokbarang, hargabarang);
         penyimpanan.simpanBarang(barang);
         System.out.println("Barang telah tersimpan dengan id: " + barang.getId());
+
+        // Save the new item to the file
+        penyimpanan.simpanKeFile("listBarang.txt");
     }
 
     public void daftarTransaksi() {
