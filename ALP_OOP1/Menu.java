@@ -8,6 +8,8 @@ public class Menu {
     private Store store;
     private Barang barang;
     private Penyimpanan penyimpanan;
+    private detailTransaksi detailTransaksi;
+    private Transaksi transaksi;
 
     public void Menu() {
         penyimpanan = new Penyimpanan();
@@ -53,11 +55,12 @@ public class Menu {
                 case 4:
                     daftarTransaksi();
                     break;
-                    
+
                 case 5:
                     totalPendapatan();
                     break;
                 case 0:
+                    detailTransaksi.simpanFile("listTransaksi.txt");
                     penyimpanan.simpanKeFile("listBarang.txt");
                     System.out.println("Thank you !");
                     System.exit(0);
@@ -68,15 +71,7 @@ public class Menu {
             }
         } while (true);
     }
-    public void masukkanTransaksi(){
-        daftarBarang();
-        System.out.print("\nPilih barang (ID): ");
-        int barangId = scan.nextInt();
-        
-        System.out.println("\nJumlah barang: ");
-        int jumlahBarang = scan.nextInt();
-        // error handling kalau inputan melebihi stok
-    }
+
     // daftar stok barang
     public void detailStok() {
         System.out.println("");
@@ -131,7 +126,10 @@ public class Menu {
     }
 
     public void editStok() {
-        penyimpanan.listBarang();
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar  Barang =====");
+        penyimpanan.bacaFile("listBarang.txt");
+        System.out.println("==========================");
         //nanti stok baklan ke sout : terus di milih mau edit stok yang mana
         // misalkan 
         // 1. baju tidur | stok: 7 | harga : 70.000
@@ -141,26 +139,31 @@ public class Menu {
         // ID : (inputan user sesuai id barang yang mau di ubah)
         // Nama barang: 
         // Stok baru : (inputan user stok digudang ada berapa banyak)
-        
+
         // kalau udah ke ubah di hashmapny, ksh statement "stok telah terubah" biar
         // tau kalau stokny udah ke ubah
     }
 
     public void editHarga() {
-        penyimpanan.listBarang();
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar  Barang =====");
+        penyimpanan.bacaFile("listBarang.txt");
+        System.out.println("==========================");
         // ini sama kek editStok, cuma ini harga aja
     }
 
     public void tambahStok() {
-        penyimpanan.listBarang();
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar  Barang =====");
+        penyimpanan.bacaFile("listBarang.txt");
+        System.out.println("==========================");
         // kalau ini nanti sama aja awalanny tpi outputny nnti gini
         // =====
         // Nama barang: (nama barangnya apa)
         // Stok terkini: (jumlah stok barangnya)
         // Stok tambahan:
-        
+
         // Stok update: (jumlah antara terkini sama tambahan, yang kesimpen di hashmap)
-        
         // ksih statement "stok telah ditambahkan"
     }
 
@@ -186,8 +189,55 @@ public class Menu {
         penyimpanan.simpanKeFile("listBarang.txt");
     }
 
-    public void daftarTransaksi() {
+    public void masukkanTransaksi() {
+        detailTransaksi = new detailTransaksi();
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar Barang =====");
+        penyimpanan.bacaFile("listBarang.txt");
+        penyimpanan.listBarang();
+        System.out.println("==========================");
+        System.out.print("\nPilih barang: ");
+        int barangId = scan.nextInt();
+        Barang barang = penyimpanan.getBarangById(barangId);
+        if (barang == null) {
+            System.out.println("Barang dengan ID tersebut tidak ditemukan.");
+            return;
+        }
+        System.out.println("Nama barang: " + barang.getNamabarang());
+        System.out.println("Jumlah stok yang tersedia: " + barang.getStokbarang());
+        System.out.print("Jumlah barang yang ingin dibeli: ");
+        int jumlahBarang = scan.nextInt();
 
+        // Error handling kalau inputan melebihi stok
+        if (jumlahBarang > barang.getStokbarang()) {
+            System.out.println("Jumlah barang yang diminta melebihi stok yang tersedia.");
+            return;
+        }
+        
+        int idTransaksi = transaksi.getIdTransaksi();
+        // Update stok barang
+        barang.setStokbarang(barang.getStokbarang() - jumlahBarang);
+        penyimpanan.updateBarang(barang); // Save updated stock to file
+
+        Transaksi transaksi = new Transaksi(idTransaksi, jumlahBarang);
+        detailTransaksi.addTransaksi(transaksi, barang);
+        detailTransaksi.simpanFile("listTransaksi.txt");
+        System.out.println("Transaksi berhasil disimpan.");
+    }
+
+
+    public void daftarTransaksi() {
+        // Membuat objek detailTransaksi
+        detailTransaksi transaksiDetail = new detailTransaksi();
+
+        // Memanggil metode bacaFile() dari objek detailTransaksi
+        transaksiDetail.bacaFile("listTransaksi.txt", penyimpanan);
+
+        System.out.println("\n==========================");
+        System.out.println("===== Daftar Transaksi =====");
+        // Memanggil metode listTransaksi() untuk menampilkan daftar transaksi
+        transaksiDetail.listTransaksi();
+        System.out.println("==========================");
     }
 
     public void totalPendapatan() {
