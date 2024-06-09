@@ -1,8 +1,15 @@
 package ALP_OOP1;
 
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Menu {
+
+    private static Locale indonesia = new Locale("id", "ID");
+    private static NumberFormat rp = NumberFormat.getCurrencyInstance(indonesia);
 
     Scanner scan = new Scanner(System.in);
     private Store store;
@@ -12,6 +19,8 @@ public class Menu {
     private Transaksi transaksi;
 
     public void Menu() {
+        System.out.println("==========================");
+        System.out.println("=====   OOPSIETORE   =====");
         penyimpanan = new Penyimpanan();
         store = new Store();
         detailTransaksi = new detailTransaksi();
@@ -61,8 +70,8 @@ public class Menu {
                     totalPendapatan();
                     break;
                 case 0:
-                    penyimpanan.simpanKeFile("listBarang.txt");
-                    detailTransaksi.simpanFile("listTransaksi.txt");
+                    //penyimpanan.simpanKeFile("listBarang.txt");
+                    //detailTransaksi.simpanFile("listTransaksi.txt");
                     System.out.println("Thank you !");
                     System.exit(0);
                     break;
@@ -131,18 +140,25 @@ public class Menu {
         System.out.println("===== Daftar  Barang =====");
         penyimpanan.bacaFile("listBarang.txt");
         System.out.println("==========================");
-        //nanti stok baklan ke sout : terus di milih mau edit stok yang mana
-        // misalkan 
-        // 1. baju tidur | stok: 7 | harga : 70.000
-        // milih lah dia no 1 trus stok di kasir asliny 7 tpi ternyata digudang
-        // cuma 5, nah nanti jadiny gni
-        // ========
-        // ID : (inputan user sesuai id barang yang mau di ubah)
-        // Nama barang: 
-        // Stok baru : (inputan user stok digudang ada berapa banyak)
 
-        // kalau udah ke ubah di hashmapny, ksh statement "stok telah terubah" biar
-        // tau kalau stokny udah ke ubah
+        System.out.print("Choose: ");
+        int pick = scan.nextInt();
+
+        Barang barangEdit = penyimpanan.getBarangById(pick);
+
+        System.out.println("==========================");
+        System.out.println("\n== Nama Barang: " + barangEdit.getNamabarang());
+        System.out.println("== Stok saat ini: " + barangEdit.getStokbarang());
+        System.out.println("==========================");
+
+        System.out.print("Masukkan stok terbaru: ");
+        int newStock = scan.nextInt();
+
+        System.out.println("% % processing . . . % %");
+        barangEdit.setStokbarang(newStock);
+        penyimpanan.updateBarang(barangEdit);
+        System.out.println("Stok barang telah berhasil diedit: " + barangEdit.getStokbarang());
+        System.out.println("==========================\n");
     }
 
     public void editHarga() {
@@ -150,7 +166,25 @@ public class Menu {
         System.out.println("===== Daftar  Barang =====");
         penyimpanan.bacaFile("listBarang.txt");
         System.out.println("==========================");
-        // ini sama kek editStok, cuma ini harga aja
+
+        System.out.print("Choose: ");
+        int pick = scan.nextInt();
+
+        Barang barangEdit = penyimpanan.getBarangById(pick);
+
+        System.out.println("==========================");
+        System.out.println("\n== Nama Barang: " + barangEdit.getNamabarang());
+        System.out.println("== Harga saat ini: " + barangEdit.getHargabarang());
+        System.out.println("==========================");
+
+        System.out.print("Masukkan stok terbaru: ");
+        int newHarga = scan.nextInt();
+
+        System.out.println("% % processing . . . % %");
+        barangEdit.setHargabarang(newHarga);
+        penyimpanan.updateBarang(barangEdit);
+        System.out.println("Harga barang telah berhasil diedit: " + barangEdit.getHargabarang());
+        System.out.println("==========================\n");
     }
 
     public void tambahStok() {
@@ -158,14 +192,26 @@ public class Menu {
         System.out.println("===== Daftar  Barang =====");
         penyimpanan.bacaFile("listBarang.txt");
         System.out.println("==========================");
-        // kalau ini nanti sama aja awalanny tpi outputny nnti gini
-        // =====
-        // Nama barang: (nama barangnya apa)
-        // Stok terkini: (jumlah stok barangnya)
-        // Stok tambahan:
 
-        // Stok update: (jumlah antara terkini sama tambahan, yang kesimpen di hashmap)
-        // ksih statement "stok telah ditambahkan"
+        System.out.print("Choose: ");
+        int pick = scan.nextInt();
+
+        Barang barangEdit = penyimpanan.getBarangById(pick);
+
+        System.out.println("==========================");
+        System.out.println("\n== Nama Barang: " + barangEdit.getNamabarang());
+        System.out.println("== Stok saat ini: " + barangEdit.getStokbarang());
+        System.out.println("==========================");
+
+        System.out.print("Masukkan stok tambahan: ");
+        int tambahStock = scan.nextInt();
+
+        // Update stok barang
+        System.out.println("% % processing . . . % %");
+        barangEdit.setStokbarang(barangEdit.getStokbarang() + tambahStock);
+        penyimpanan.updateBarang(barangEdit);
+        System.out.println("Stock barang telah berhasil diedit: " + barangEdit.getStokbarang());
+        System.out.println("==========================\n");
     }
 
     public void tambahBarang() {
@@ -213,30 +259,30 @@ public class Menu {
             System.out.println("Jumlah barang yang diminta melebihi stok yang tersedia.");
             return;
         }
-        
+        int totalharga = (int) (barang.getHargabarang() * jumlahBarang);
         // Update stok barang
         barang.setStokbarang(barang.getStokbarang() - jumlahBarang);
         penyimpanan.updateBarang(barang); // Save updated stock to file
 
-        Transaksi transaksi = new Transaksi(jumlahBarang);
+        Transaksi transaksi = new Transaksi(jumlahBarang, totalharga);
         detailTransaksi.addTransaksi(transaksi, barang);
         detailTransaksi.simpanFile("listTransaksi.txt");
         System.out.println("Transaksi berhasil disimpan.");
     }
 
-
     public void daftarTransaksi() {
         // Membuat objek detailTransaksi
-        detailTransaksi transaksiDetail = new detailTransaksi();
+        detailTransaksi = new detailTransaksi();
 
         System.out.println("\n==========================");
         System.out.println("===== Daftar Transaksi =====");
         // Memanggil metode listTransaksi() untuk menampilkan daftar transaksi
-        transaksiDetail.bacaFile("listTransaksi.txt");
+        detailTransaksi.bacaFile("listTransaksi.txt");
         System.out.println("==========================");
     }
 
     public void totalPendapatan() {
-
+     detailTransaksi detailPendapatan = new detailTransaksi();
+     
     }
 }

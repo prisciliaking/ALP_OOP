@@ -24,56 +24,51 @@ public class detailTransaksi {
     }
 
     public void listTransaksi() {
-
-    for (Map.Entry<Transaksi, Barang> entry : transaksiMap.entrySet()) {
-        Transaksi transaksi = entry.getKey();
-        Barang barang = entry.getValue();
-        String dateFormat = transaksi.getDate().formatted(date);
-
-        System.out.println(String.format("%d | Tanggal: %s | Barang: %s | Jumlah: %d | Harga: %s",
-                transaksi.getIdTransaksi(),
-                dateFormat,
-                barang.getNamabarang(),
-                transaksi.getJumlahBarang(),
-                rp.format(barang.getHargabarang())));
-    }
-}
-
-
-    public void simpanFile(String listTransaksi) {
-    DateTimeFormatter date = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss", indonesia);
-
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(listTransaksi, true))) {
-        // Baca id transaksi terakhir dari file
-        int lastIdTransaksi = bacaIdTransaksiTerakhir(listTransaksi);
-
         for (Map.Entry<Transaksi, Barang> entry : transaksiMap.entrySet()) {
             Transaksi transaksi = entry.getKey();
             Barang barang = entry.getValue();
-
-            // Update id transaksi jika sudah ada di file
-            if (transaksi.getIdTransaksi() <= lastIdTransaksi) {
-                transaksi.setIdTransaksi(lastIdTransaksi + 1);
-            }
-
             String dateFormat = transaksi.getDate().formatted(date);
-            String line = String.format("%d | %s | %s | %d | %s",
+
+            System.out.println(String.format("%d | Tanggal: %s | Barang: %s | Jumlah: %d | Harga: %s",
                     transaksi.getIdTransaksi(),
                     dateFormat,
                     barang.getNamabarang(),
                     transaksi.getJumlahBarang(),
-                    rp.format(barang.getHargabarang()));
-            writer.write(line);
-            writer.newLine();
-
-            // Perbarui lastIdTransaksi setelah penulisan
-            lastIdTransaksi = transaksi.getIdTransaksi();
+                    rp.format(transaksi.getTotalHarga())));
         }
-    } catch (IOException e) {
-        e.printStackTrace();
     }
-}
 
+    public void simpanFile(String listTransaksi) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(listTransaksi, true))) {
+            // Baca id transaksi terakhir dari file
+            int lastIdTransaksi = bacaIdTransaksiTerakhir(listTransaksi);
+
+            for (Map.Entry<Transaksi, Barang> entry : transaksiMap.entrySet()) {
+                Transaksi transaksi = entry.getKey();
+                Barang barang = entry.getValue();
+
+                // Update id transaksi jika sudah ada di file
+                if (transaksi.getIdTransaksi() <= lastIdTransaksi) {
+                    transaksi.setIdTransaksi(lastIdTransaksi + 1);
+                }
+
+                String dateFormat = transaksi.getDate().formatted(date);
+                String line = String.format("%d | %s | %s | %d | %s ",
+                        transaksi.getIdTransaksi(),
+                        dateFormat,
+                        barang.getNamabarang(),
+                        transaksi.getJumlahBarang(),
+                        rp.format(transaksi.getTotalHarga()));
+                writer.write(line);
+                writer.newLine();
+
+                // Perbarui lastIdTransaksi setelah penulisan
+                lastIdTransaksi = transaksi.getIdTransaksi();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private int bacaIdTransaksiTerakhir(String listTransaksi) {
         int lastIdTransaksi = 0;
@@ -102,14 +97,13 @@ public class detailTransaksi {
         try (BufferedReader reader = new BufferedReader(new FileReader(listTransaksi))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                // Cetak setiap baris yang dibaca
                 System.out.println(line);
 
                 if (line.trim().isEmpty()) {
-                    continue; // Skip empty lines
+                    continue;
                 }
                 String[] parts = line.split(" \\| ");
-                if (parts.length < 5) { // Ensure there are at least 5 parts
+                if (parts.length < 5) {
                     Logger.getLogger(detailTransaksi.class.getName()).log(Level.WARNING, "Invalid line format: " + line);
                     continue;
                 }
@@ -118,11 +112,10 @@ public class detailTransaksi {
                     LocalDateTime dateFormat = LocalDateTime.parse(parts[1].trim(), date);
                     String namaBarang = parts[2].trim();
                     int jumlahBarang = Integer.parseInt(parts[3].trim());
-                    double hargaBarang = Double.parseDouble(parts[4].trim().replace("Rp", "").replace(",", ""));
+                    double hargaBarang = Double.parseDouble(parts[4].trim().replace("Rp", "").replace(",", "").replace(" ", ""));
 
-                    // Find barang by name (assuming names are unique)
                     Barang barang = penyimpanan.getBarangByName(namaBarang);
-                    Transaksi transaksi = new Transaksi(jumlahBarang);
+                    Transaksi transaksi = new Transaksi(jumlahBarang, (int) hargaBarang);
                     transaksi.setIdTransaksi(idTransaksi);
                     transaksi.setDate(dateFormat);
                     transaksiMap.put(transaksi, barang);

@@ -5,16 +5,17 @@ import java.time.format.DateTimeFormatter;
 
 public class Transaksi {
     static int idTransaksi = 1;
-    int jumlahBarang;
+    int jumlahBarang, totalharga;
     private LocalDateTime date;
     private int currentIdTransaksi;
 
-    public Transaksi(int jumlahBarang) {
+    public Transaksi(int jumlahBarang, int totalharga) {
         this.currentIdTransaksi = idTransaksi++;
         this.date = LocalDateTime.now();
         this.jumlahBarang = jumlahBarang;
+        this.totalharga = totalharga;
     }
-
+    
     public int getIdTransaksi() {
         return currentIdTransaksi;
     }
@@ -34,5 +35,9 @@ public class Transaksi {
 
     public int getJumlahBarang() {
         return jumlahBarang;
+    }
+    
+    public int getTotalHarga(){
+        return totalharga;
     }
 }

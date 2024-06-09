@@ -39,4 +39,10 @@ public class Barang {
     public double getHargabarang() {
         return hargabarang;
     }
+
+    public void setHargabarang(double hargabarang) {
+        this.hargabarang = hargabarang;
+    }
+    
+    
 }
