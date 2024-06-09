@@ -1,16 +1,17 @@
 package ALP_OOP1;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Transaksi {
     static int idTransaksi = 1;
     int jumlahBarang;
-    private LocalDate date;
+    private LocalDateTime date;
     private int currentIdTransaksi;
 
-    public Transaksi(int id, int jumlahBarang) {
+    public Transaksi(int jumlahBarang) {
         this.currentIdTransaksi = idTransaksi++;
-        this.date = LocalDate.now();
+        this.date = LocalDateTime.now();
         this.jumlahBarang = jumlahBarang;
     }
 
@@ -22,11 +23,12 @@ public class Transaksi {
         this.currentIdTransaksi = idTransaksi;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public String getDate() {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss");
+        return date.format(dateFormat);
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

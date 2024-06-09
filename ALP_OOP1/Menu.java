@@ -14,6 +14,7 @@ public class Menu {
     public void Menu() {
         penyimpanan = new Penyimpanan();
         store = new Store();
+        detailTransaksi = new detailTransaksi();
         do {
             System.out.println("");
             System.out.println("==========================");
@@ -60,8 +61,8 @@ public class Menu {
                     totalPendapatan();
                     break;
                 case 0:
-                    detailTransaksi.simpanFile("listTransaksi.txt");
                     penyimpanan.simpanKeFile("listBarang.txt");
+                    detailTransaksi.simpanFile("listTransaksi.txt");
                     System.out.println("Thank you !");
                     System.exit(0);
                     break;
@@ -194,7 +195,6 @@ public class Menu {
         System.out.println("\n==========================");
         System.out.println("===== Daftar Barang =====");
         penyimpanan.bacaFile("listBarang.txt");
-        penyimpanan.listBarang();
         System.out.println("==========================");
         System.out.print("\nPilih barang: ");
         int barangId = scan.nextInt();
@@ -214,12 +214,11 @@ public class Menu {
             return;
         }
         
-        int idTransaksi = transaksi.getIdTransaksi();
         // Update stok barang
         barang.setStokbarang(barang.getStokbarang() - jumlahBarang);
         penyimpanan.updateBarang(barang); // Save updated stock to file
 
-        Transaksi transaksi = new Transaksi(idTransaksi, jumlahBarang);
+        Transaksi transaksi = new Transaksi(jumlahBarang);
         detailTransaksi.addTransaksi(transaksi, barang);
         detailTransaksi.simpanFile("listTransaksi.txt");
         System.out.println("Transaksi berhasil disimpan.");
@@ -230,13 +229,10 @@ public class Menu {
         // Membuat objek detailTransaksi
         detailTransaksi transaksiDetail = new detailTransaksi();
 
-        // Memanggil metode bacaFile() dari objek detailTransaksi
-        transaksiDetail.bacaFile("listTransaksi.txt", penyimpanan);
-
         System.out.println("\n==========================");
         System.out.println("===== Daftar Transaksi =====");
         // Memanggil metode listTransaksi() untuk menampilkan daftar transaksi
-        transaksiDetail.listTransaksi();
+        transaksiDetail.bacaFile("listTransaksi.txt");
         System.out.println("==========================");
     }
 

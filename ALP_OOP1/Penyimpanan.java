@@ -38,8 +38,6 @@ public class Penyimpanan {
     }
 
     public void listBarang() {
-        System.out.println("\n==========================");
-        System.out.println("===== Daftar  Barang =====");
         for (Barang barang : barangMap.values()) {
             System.out.println(String.format("%d. Nama: %s | Stok: %d | Harga %s",
                     barang.getId(),
@@ -48,7 +46,6 @@ public class Penyimpanan {
                     rp.format(barang.getHargabarang())
             ));
         }
-        System.out.println("==========================");
     }
 
     public void simpanKeFile(String listBarang) {
@@ -68,7 +65,6 @@ public class Penyimpanan {
     }
 
     public void bacaFile(String listBarang) {
-        barangMap.clear(); // Clear the existing data to avoid duplication
         try (BufferedReader reader = new BufferedReader(new FileReader(listBarang))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -94,6 +90,7 @@ public class Penyimpanan {
                     if (id >= idBarang) {
                         idBarang = id + 1;
                     }
+                    System.out.println(line);
                 } catch (NumberFormatException e) {
                     // Handle the case where ID or other numbers are not valid
                     Logger.getLogger(Penyimpanan.class.getName()).log(Level.WARNING, "Invalid number format in file: " + line, e);
