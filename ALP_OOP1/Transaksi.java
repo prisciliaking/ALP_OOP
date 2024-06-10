@@ -25,7 +25,8 @@ public class Transaksi {
     }
 
     public String getDate() {
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss");
+        // nyimpen dalam format pattern, pake localdatetime kemudian di format biar ada timenya
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return date.format(dateFormat);
     }
 

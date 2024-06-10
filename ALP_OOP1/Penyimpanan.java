@@ -38,6 +38,8 @@ public class Penyimpanan {
     }
 
     public void listBarang() {
+        // ngecek value dalam hashmap barang sesuai dengan objek barang
+        // lalu diget kemudian di simpan dalam string format
         for (Barang barang : barangMap.values()) {
             System.out.println(String.format("%d. Nama: %s | Stok: %d | Harga %s",
                     barang.getId(),
@@ -56,7 +58,9 @@ public class Penyimpanan {
                         barang.getNamabarang(),
                         barang.getStokbarang(),
                         barang.getHargabarang());
+                // .write itu nyimpen string line ini dalam file listBarang.txt
                 writer.write(line);
+                // .newLine ini biar bisa input barang baru yang disimpan dalam barangMap
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -65,38 +69,48 @@ public class Penyimpanan {
     }
 
     public void bacaFile(String listBarang) {
+        // Menggunakan try-with-resources untuk memastikan BufferedReader ditutup setelah digunakan
         try (BufferedReader reader = new BufferedReader(new FileReader(listBarang))) {
             String line;
+            // Membaca setiap baris dalam file sampai mencapai akhir file (null)
             while ((line = reader.readLine()) != null) {
+                // Lewati baris kosong
                 if (line.trim().isEmpty()) {
-                    continue; // Skip empty lines
+                    continue; // Lewati baris kosong
                 }
-                // Parsing the ID from the file
+                // Memisahkan ID dan detail lainnya dari file berdasarkan delimiter " | "
                 String[] parts = line.split(" \\| ");
-                if (parts.length < 4) { // Ensure there are at least 4 parts
+                if (parts.length < 4) { // Memastikan ada setidaknya 4 bagian
+                    // Log peringatan jika format baris tidak valid
                     Logger.getLogger(Penyimpanan.class.getName()).log(Level.WARNING, "Invalid line format: " + line);
                     continue;
                 }
                 try {
+                    // Parsing nilai ID, nama barang, stok barang, dan harga barang dari string ke tipe data yang sesuai
                     int id = Integer.parseInt(parts[0].trim());
                     String namabarang = parts[1].trim();
                     int stokbarang = Integer.parseInt(parts[2].trim());
                     double hargabarang = Double.parseDouble(parts[3].replace("Rp", "").replace(",", "").trim());
 
+                    // Membuat objek Barang dengan informasi yang telah di-parse
                     Barang barang = new Barang(namabarang, stokbarang, hargabarang);
                     barang.setId(id);
+                    // Menambahkan objek Barang ke dalam peta (map) dengan ID sebagai kunci
                     barangMap.put(id, barang);
 
+                    // Memperbarui idBarang jika ID yang di-parse lebih besar atau sama dengan idBarang saat ini
                     if (id >= idBarang) {
                         idBarang = id + 1;
                     }
+                    // Mencetak baris yang telah dibaca dan di-parse
                     System.out.println(line);
                 } catch (NumberFormatException e) {
-                    // Handle the case where ID or other numbers are not valid
+                    // Menangani kasus di mana ID atau angka lain tidak valid
                     Logger.getLogger(Penyimpanan.class.getName()).log(Level.WARNING, "Invalid number format in file: " + line, e);
                 }
             }
         } catch (IOException ex) {
+            // Log kesalahan jika ada masalah dalam membaca file
             Logger.getLogger(Penyimpanan.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

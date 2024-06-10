@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -14,20 +14,23 @@ import java.util.logging.Logger;
 
 public class detailTransaksi {
 
-    private Map<Transaksi, Barang> transaksiMap = new HashMap<>();
-    private static Locale indonesia = new Locale("id", "ID");
-    private static NumberFormat rp = NumberFormat.getCurrencyInstance(indonesia);
-    DateTimeFormatter date = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss", indonesia);
+    private ArrayList<DetailTransaksiEntry> transaksiList = new ArrayList<>();
+    private Map<LocalDate, Double> totalPriceByDate = new HashMap<>();
+    private Locale indonesia = new Locale("id", "ID");
+    private NumberFormat rp = NumberFormat.getCurrencyInstance(indonesia);
+    private DateTimeFormatter date = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", indonesia);
 
     public void addTransaksi(Transaksi transaksi, Barang barang) {
-        transaksiMap.put(transaksi, barang);
+        transaksiList.add(new DetailTransaksiEntry(transaksi, barang));
+        updateTotalPriceByDate(transaksi);
+        simpanFile("listTransaksi.txt");
     }
 
     public void listTransaksi() {
-        for (Map.Entry<Transaksi, Barang> entry : transaksiMap.entrySet()) {
-            Transaksi transaksi = entry.getKey();
-            Barang barang = entry.getValue();
-            String dateFormat = transaksi.getDate().formatted(date);
+        for (DetailTransaksiEntry entry : transaksiList) {
+            Transaksi transaksi = entry.getTransaksi();
+            Barang barang = entry.getBarang();
+            String dateFormat = transaksi.getDate();
 
             System.out.println(String.format("%d | Tanggal: %s | Barang: %s | Jumlah: %d | Harga: %s",
                     transaksi.getIdTransaksi(),
@@ -39,36 +42,43 @@ public class detailTransaksi {
     }
 
     public void simpanFile(String listTransaksi) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(listTransaksi, true))) {
-            // Baca id transaksi terakhir dari file
-            int lastIdTransaksi = bacaIdTransaksiTerakhir(listTransaksi);
+    // Inisialisasi logger
+    Logger logger = Logger.getLogger(getClass().getName());
 
-            for (Map.Entry<Transaksi, Barang> entry : transaksiMap.entrySet()) {
-                Transaksi transaksi = entry.getKey();
-                Barang barang = entry.getValue();
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(listTransaksi, true))) {
+        // Baca id transaksi terakhir dari file
+        int lastIdTransaksi = bacaIdTransaksiTerakhir(listTransaksi);
 
-                // Update id transaksi jika sudah ada di file
-                if (transaksi.getIdTransaksi() <= lastIdTransaksi) {
-                    transaksi.setIdTransaksi(lastIdTransaksi + 1);
-                }
+        for (DetailTransaksiEntry entry : transaksiList) {
+            Transaksi transaksi = entry.getTransaksi();
+            Barang barang = entry.getBarang();
 
-                String dateFormat = transaksi.getDate().formatted(date);
-                String line = String.format("%d | %s | %s | %d | %s ",
-                        transaksi.getIdTransaksi(),
-                        dateFormat,
-                        barang.getNamabarang(),
-                        transaksi.getJumlahBarang(),
-                        rp.format(transaksi.getTotalHarga()));
-                writer.write(line);
-                writer.newLine();
-
-                // Perbarui lastIdTransaksi setelah penulisan
-                lastIdTransaksi = transaksi.getIdTransaksi();
+            // Update id transaksi jika sudah ada di file
+            if (transaksi.getIdTransaksi() <= lastIdTransaksi) {
+                transaksi.setIdTransaksi(lastIdTransaksi + 1);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            String dateFormat = transaksi.getDate();
+            String line = String.format("%d | %s | %s | %d | %s ",
+                    transaksi.getIdTransaksi(),
+                    dateFormat,
+                    barang.getNamabarang(),
+                    transaksi.getJumlahBarang(),
+                    rp.format(transaksi.getTotalHarga()));
+            writer.write(line);
+            writer.newLine();
+
+            // Perbarui lastIdTransaksi setelah penulisan
+            lastIdTransaksi = transaksi.getIdTransaksi();
+
+            // Log pesan bahwa data berhasil ditambahkan
+           
         }
+    } catch (IOException e) {
+        // Tangani kesalahan dengan mencetak stack trace dan log pesan kesalahan
+        logger.log(Level.SEVERE, "Terjadi kesalahan saat menyimpan file: " + listTransaksi, e);
     }
+}
 
     private int bacaIdTransaksiTerakhir(String listTransaksi) {
         int lastIdTransaksi = 0;
@@ -107,25 +117,40 @@ public class detailTransaksi {
                     Logger.getLogger(detailTransaksi.class.getName()).log(Level.WARNING, "Invalid line format: " + line);
                     continue;
                 }
-                try {
-                    int idTransaksi = Integer.parseInt(parts[0].trim());
-                    LocalDateTime dateFormat = LocalDateTime.parse(parts[1].trim(), date);
-                    String namaBarang = parts[2].trim();
-                    int jumlahBarang = Integer.parseInt(parts[3].trim());
-                    double hargaBarang = Double.parseDouble(parts[4].trim().replace("Rp", "").replace(",", "").replace(" ", ""));
+                int idTransaksi = Integer.parseInt(parts[0].trim());
+                LocalDateTime dateFormat = LocalDateTime.parse(parts[1].trim(), date);
+                String namaBarang = parts[2].trim();
+                int jumlahBarang = Integer.parseInt(parts[3].trim());
+                double hargaBarang = Double.parseDouble(parts[4].trim().replace("Rp", "").replace(",", "").replace(" ", ""));
 
-                    Barang barang = penyimpanan.getBarangByName(namaBarang);
-                    Transaksi transaksi = new Transaksi(jumlahBarang, (int) hargaBarang);
-                    transaksi.setIdTransaksi(idTransaksi);
-                    transaksi.setDate(dateFormat);
-                    transaksiMap.put(transaksi, barang);
+                Barang barang = penyimpanan.getBarangByName(namaBarang);
+                Transaksi transaksi = new Transaksi(jumlahBarang, (int) hargaBarang);
+                transaksi.setIdTransaksi(idTransaksi);
+                transaksi.setDate(dateFormat);
+                transaksiList.add(new DetailTransaksiEntry(transaksi, barang));
 
-                } catch (NumberFormatException | DateTimeParseException e) {
-                    Logger.getLogger(detailTransaksi.class.getName()).log(Level.WARNING, "Invalid number format in file: " + line, e);
-                }
+                updateTotalPriceByDate(transaksi); // Update total price by date
             }
         } catch (IOException ex) {
             Logger.getLogger(detailTransaksi.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    private void updateTotalPriceByDate(Transaksi transaksi) {
+        LocalDateTime transactionDateTime = LocalDateTime.parse(transaksi.getDate(), date);
+        LocalDate transactionDate = transactionDateTime.toLocalDate();
+
+        double totalPrice = totalPriceByDate.getOrDefault(transactionDate, 0.0);
+        // dikali 1000 soalny hanya ambil angka sebelum .000
+        double totalFix = (totalPrice += transaksi.getTotalHarga() * 1000); // Tambahkan total harga transaksi ke total harga untuk tanggal tersebut
+        totalPriceByDate.put(transactionDate, totalFix);
+
+        // Debugging output with formatted total price
+        //System.out.println("Updated total price for " + transactionDate + ": " + rp.format(totalPrice));
+    }
+
+    public double getTotalPriceByDate(LocalDate targetDate) {
+        return totalPriceByDate.getOrDefault(targetDate, 0.0);
+    }
 }
+    
